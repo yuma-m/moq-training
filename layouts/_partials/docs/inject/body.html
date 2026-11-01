@@ -1,0 +1,2 @@
+{{- $js := resources.Get "quiz.js" | resources.Minify | resources.Fingerprint }}
+<script defer src="{{ $js.RelPermalink }}"></script>

@@ -1,0 +1,29 @@
+baseURL = '/'
+title = '楽しく学ぶ Media over QUIC'
+theme = 'hugo-book'
+locale = 'ja'
+defaultContentLanguage = 'ja'
+hasCJKLanguage = true
+enableGitInfo = false
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.goldmark.parser.attribute]
+  block = true
+  title = true
+
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3
+
+[markup.highlight]
+  style = 'github-dark'
+
+[params]
+  BookTheme = 'auto'
+  BookToC = true
+  BookSection = 'docs'
+  BookSearch = true
+  BookComments = false
+  BookDateFormat = '2006年1月2日'

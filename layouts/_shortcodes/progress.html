@@ -1,0 +1,14 @@
+{{- $section := site.GetPage "/docs" -}}
+<table class="quiz-progress">
+  <thead><tr><th>章</th><th>クイズ</th></tr></thead>
+  <tbody>
+  {{- range $section.Pages.ByWeight }}
+    {{- if .Params.quiz }}
+    <tr data-progress-key="{{ .RelPermalink }}" data-quiz-total="{{ len .Params.quiz }}">
+      <td><a href="{{ .RelPermalink }}">{{ .Title }}</a></td>
+      <td class="quiz-progress-status">未挑戦</td>
+    </tr>
+    {{- end }}
+  {{- end }}
+  </tbody>
+</table>

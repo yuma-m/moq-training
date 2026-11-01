@@ -1,0 +1,33 @@
+{{- $quiz := .Page.Params.quiz -}}
+{{- if not $quiz -}}
+  {{- errorf "quiz shortcode used without front matter 'quiz' in %s" .Page.File.Path -}}
+{{- end -}}
+<div class="quiz" data-quiz-key="{{ .Page.RelPermalink }}" data-quiz-total="{{ len $quiz }}">
+  {{- range $i, $item := $quiz }}
+  {{- if or (lt $item.answer 0) (ge $item.answer (len $item.choices)) -}}
+    {{- errorf "quiz answer out of range: %s Q%d" $.Page.File.Path (add $i 1) -}}
+  {{- end }}
+  <div class="quiz-item" data-answer="{{ $item.answer }}">
+    <div class="quiz-question">
+      <span class="quiz-number">Q{{ add $i 1 }}</span>
+      <div>{{ $item.q | $.Page.RenderString }}</div>
+    </div>
+    {{- with $item.code }}
+    {{ transform.Highlight . ($item.lang | default "text") "" }}
+    {{- end }}
+    <div class="quiz-choices">
+      {{- range $j, $c := $item.choices }}
+      <button type="button" class="quiz-choice" data-index="{{ $j }}">{{ $c | $.Page.RenderString }}</button>
+      {{- end }}
+    </div>
+    <div class="quiz-explain" hidden>
+      <p class="quiz-verdict"></p>
+      {{ $item.explain | $.Page.RenderString (dict "display" "block") }}
+    </div>
+  </div>
+  {{- end }}
+  <div class="quiz-result" hidden>
+    <p class="quiz-score"></p>
+    <button type="button" class="quiz-reset">もう一度挑戦する</button>
+  </div>
+</div>

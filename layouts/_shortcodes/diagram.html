@@ -1,0 +1,6 @@
+<figure class="diagram">
+{{ .Inner | safeHTML }}
+{{- with .Get "caption" }}
+<figcaption>{{ . | $.Page.RenderString }}</figcaption>
+{{- end }}
+</figure>
