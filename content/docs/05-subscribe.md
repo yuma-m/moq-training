@@ -55,11 +55,11 @@ quiz:
 
 ## 💡 ひとことで言うと
 
-> **購読は「新しく出た Object を届け続けてもらう契約」**。どこから届けるか（フィルタ）、どれくらい急ぐか（優先度）を契約時に決め、あとから変更もできます。
+> 購読は「新しく出た Object を届け続けてもらう契約」。どこから届けるか（フィルタ）、どれくらい急ぐか（優先度）を契約時に決め、あとから変更もできます。
 
 ## 購読の状態遷移
 
-購読は **SUBSCRIBE（サブスクライバ発）** でも **PUBLISH（パブリッシャ発）** でも始められます。
+購読は SUBSCRIBE（サブスクライバ発）でも PUBLISH（パブリッシャ発）でも始められます。
 
 {{< mermaid >}}
 stateDiagram-v2
@@ -77,7 +77,7 @@ stateDiagram-v2
   PendingPub: Pending (Publisher)
 {{< /mermaid >}}
 
-- 終了はサブスクライバなら **STOP_SENDING**（リクエストのキャンセル）、パブリッシャなら **PUBLISH_DONE を送ってストリームを閉じる**
+- 終了はサブスクライバなら STOP_SENDING（リクエストのキャンセル）、パブリッシャなら PUBLISH_DONE を送ってストリームを閉じる
 - REQUEST_ERROR で終わったリクエストでは Object は一切送られない
 
 ## SUBSCRIBE: サブスクライバから頼む
@@ -105,7 +105,7 @@ SUBSCRIBE {
 | `NEW_GROUP_REQUEST` | 新しい Group を始めてほしいと依頼（後述） |
 | `AUTHORIZATION_TOKEN` | 認可トークン |
 
-成功すると、パブリッシャは同じストリームで **SUBSCRIBE_OK** を返します。
+成功すると、パブリッシャは同じストリームで SUBSCRIBE_OK を返します。
 
 ```text
 SUBSCRIBE_OK {
@@ -129,25 +129,25 @@ sequenceDiagram
 
 ### Track Alias
 
-データストリームやデータグラムは、長い Full Track Name の代わりに **Track Alias（数値）** でトラックを指します。Alias はパブリッシャが決め、SUBSCRIBE_OK か PUBLISH で伝えます。
+データストリームやデータグラムは、長い Full Track Name の代わりに Track Alias（数値）でトラックを指します。Alias はパブリッシャが決め、SUBSCRIBE_OK か PUBLISH で伝えます。
 
 - 同じセッションで、同時に 2 つの異なるトラックに同じ Alias を使ってはいけない（`DUPLICATE_TRACK_ALIAS`）
 - 制御メッセージより先にデータが届くことがあるので、受信側は未知の Alias のデータをしばらくバッファしてよい
 
 ### Largest Object
 
-**Largest Object** は、パブリッシャから見てそのトラックで最も大きい Location の Object です（まだ受信途中かもしれない）。SUBSCRIBE_OK の `LARGEST_OBJECT` パラメータで分かります。ここから 2 つの便利な位置が決まります。
+Largest Object は、パブリッシャから見てそのトラックで最も大きい Location の Object です（まだ受信途中かもしれない）。SUBSCRIBE_OK の `LARGEST_OBJECT` パラメータで分かります。ここから次の 2 つの位置が決まります。
 
-- **Next Object** = `{Largest.Group, Largest.Object + 1}`（何もなければ `{0, 0}`）
-- **Next Group** = `{Largest.Group + 1, 0}`
+- Next Object = `{Largest.Group, Largest.Object + 1}`（何もなければ `{0, 0}`）
+- Next Group = `{Largest.Group + 1, 0}`
 
 ## PUBLISH: パブリッシャから押し込む
 
-パブリッシャは **PUBLISH** で、相手に頼まれる前に購読を始められます。PUBLISH 自体に Track Alias やトラックのプロパティが入っていて、サブスクライバは REQUEST_OK（PUBLISH_OK）か REQUEST_ERROR（PUBLISH_ERROR）で応えます。
+パブリッシャは PUBLISH で、相手に頼まれる前に購読を始められます。PUBLISH 自体に Track Alias やトラックのプロパティが入っていて、サブスクライバは REQUEST_OK（PUBLISH_OK）か REQUEST_ERROR（PUBLISH_ERROR）で応えます。
 
-- 遅延を減らすため、**PUBLISH_OK を待たずに Object を送り始めてもよい**
+- 遅延を減らすため、PUBLISH_OK を待たずに Object を送り始めてもよい
 - 興味のない PUBLISH には `UNINTERESTED` で断り、関連ストリームを STOP_SENDING する
-- **リレーは、相手が興味を持ち認可されていると分かるまで PUBLISH を送ってはいけない**。その意思表示に使うのが SUBSCRIBE_TRACKS などです（07 章）
+- リレーは、相手が興味を持ち認可されていると分かるまで PUBLISH を送ってはいけない。その意思表示に使うのが SUBSCRIBE_TRACKS などです（07 章）
 
 ## Location フィルタ: どこから届けるか
 
@@ -162,7 +162,7 @@ sequenceDiagram
 | 0x04 Absolute Range | `{StartGroup, StartObject}` | `{StartGroup + EndGroupDelta, EndObject}` |
 | 0x05 Next Object | Next Object | 無期限 |
 
-Relative Start の StartGroup は「Next Group から何 Group さかのぼるか」です。**0 = Next Group、1 = 現在の Group、2 = 1 つ前の Group** …… と読みます。
+Relative Start の StartGroup は「Next Group から何 Group さかのぼるか」です。0 = Next Group、1 = 現在の Group、2 = 1 つ前の Group …… と読みます。
 
 ## ライブへの途中参加: 4 つのパターン
 
@@ -200,24 +200,24 @@ Fill の詳しい仕組みは次章で扱います。
 
 ### Dynamic Groups: 新しい Group を頼む
 
-Group の真ん中で参加すると、②では Group の先頭からのデータを大量に受け取ることになり、④では次の Group まで待たされます。トラックが **DYNAMIC_GROUPS** プロパティ（値 1）を持っていれば、サブスクライバは `NEW_GROUP_REQUEST` パラメータで「新しい Group（= 新しいキーフレーム）を始めて」とオリジナルのパブリッシャに頼めます。リレーは同じ依頼を重複して上流に送らないようにまとめます。
+Group の真ん中で参加すると、②では Group の先頭からのデータを大量に受け取ることになり、④では次の Group まで待たされます。トラックが DYNAMIC_GROUPS プロパティ（値 1）を持っていれば、サブスクライバは `NEW_GROUP_REQUEST` パラメータで「新しい Group（= 新しいキーフレーム）を始めて」とオリジナルのパブリッシャに頼めます。リレーは同じ依頼を重複して上流に送らないようにまとめます。
 
 ## 購読の更新: REQUEST_UPDATE
 
-購読した側は、同じリクエストストリームで **REQUEST_UPDATE** を送ってパラメータを変更できます（応答は REQUEST_OK / REQUEST_ERROR）。含めなかったパラメータは変わりません。
+購読した側は、同じリクエストストリームで REQUEST_UPDATE を送ってパラメータを変更できます（応答は REQUEST_OK / REQUEST_ERROR）。含めなかったパラメータは変わりません。
 
-- **一時停止 / 再開**: `FORWARD` を 0 / 1 に。停止中も PUBLISH_DONE などの制御メッセージは届く
-- **優先度の変更**: `SUBSCRIBER_PRIORITY`
-- **範囲の変更**: `LOCATION_FILTER`。開始位置を前にずらすなら `FILL_PARAMETERS` で過去分を補える
-- **期限の延長**: パブリッシャが `EXPIRES`（ミリ秒）を伝えてきたら、REQUEST_UPDATE（必要なら新しいトークン付き）で延長を頼む
+- 一時停止 / 再開: `FORWARD` を 0 / 1 に。停止中も PUBLISH_DONE などの制御メッセージは届く
+- 優先度の変更: `SUBSCRIBER_PRIORITY`
+- 範囲の変更: `LOCATION_FILTER`。開始位置を前にずらすなら `FILL_PARAMETERS` で過去分を補える
+- 期限の延長: パブリッシャが `EXPIRES`（ミリ秒）を伝えてきたら、REQUEST_UPDATE（必要なら新しいトークン付き）で延長を頼む
 
 更新が失敗した購読は、パブリッシャが `UPDATE_FAILED` の PUBLISH_DONE で終了させます。
 
-パブリッシャ側の都合で状態が変わったときは、応答不要の通知 **PUBLISH_STATE_NOTIFY** で `LARGEST_OBJECT`・`FORWARD`・`LOCATION_FILTER` の現在値を知らせます。
+パブリッシャ側の都合で状態が変わったときは、応答不要の通知 PUBLISH_STATE_NOTIFY で `LARGEST_OBJECT`・`FORWARD`・`LOCATION_FILTER` の現在値を知らせます。
 
 ## 購読の終了: PUBLISH_DONE
 
-パブリッシャは購読をやめるとき、リクエストストリームの **最後のメッセージ** として PUBLISH_DONE を送ってから FIN します。
+パブリッシャは購読をやめるとき、リクエストストリームの最後のメッセージとして PUBLISH_DONE を送ってから FIN します。
 
 ```text
 PUBLISH_DONE {
@@ -228,15 +228,15 @@ PUBLISH_DONE {
 }
 ```
 
-PUBLISH_DONE は遅れて開くデータストリームより先に届くことがあるので、サブスクライバは **Stream Count と受信済みのストリーム数を比べ**、一致したら状態を消します（不明ならタイムアウトで消す）。
+PUBLISH_DONE は遅れて開くデータストリームより先に届くことがあるので、サブスクライバは Stream Count と受信済みのストリーム数を比べ、一致したら状態を消します（不明ならタイムアウトで消す）。
 
 ## おまけ: TRACK_STATUS
 
-**TRACK_STATUS** は「購読はしないけど、今の状態を教えて」というリクエストです。形式は SUBSCRIBE と同じで、パブリッシャは SUBSCRIBE_OK と同じパラメータ（`LARGEST_OBJECT` など）とプロパティを REQUEST_OK で返し、ストリームを閉じます。
+TRACK_STATUS は「購読はしないけど、今の状態を教えて」というリクエストです。形式は SUBSCRIBE と同じで、パブリッシャは SUBSCRIBE_OK と同じパラメータ（`LARGEST_OBJECT` など）とプロパティを REQUEST_OK で返し、ストリームを閉じます。
 
 ## 🧪 考えてみよう
 
-ビデオ会議で、画面に表示していない参加者の映像を購読し続けると帯域がもったいない。かといって購読をやめると、再表示したときに購読し直す往復が発生します。こんなときは `FORWARD=0` で **一時停止** しておけば、状態を保ったまま帯域だけを節約できます。再表示するときは `FORWARD=1` に加え、`NEW_GROUP_REQUEST` で新しいキーフレームを頼むと素早く絵が出ます。
+ビデオ会議で、画面に表示していない参加者の映像を購読し続けると帯域がもったいない。かといって購読をやめると、再表示したときに購読し直す往復が発生します。こんなときは `FORWARD=0` で一時停止しておけば、状態を保ったまま帯域だけを節約できます。再表示するときは `FORWARD=1` に加え、`NEW_GROUP_REQUEST` で新しいキーフレームを頼むと素早く絵が出ます。
 
 ## 📝 まとめ
 

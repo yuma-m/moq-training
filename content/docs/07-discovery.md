@@ -17,7 +17,7 @@ quiz:
       - "SUBSCRIBE_NAMESPACE はパブリッシャが送り、SUBSCRIBE_TRACKS はサブスクライバが送る"
       - "SUBSCRIBE_TRACKS は過去のトラックだけを返す"
     answer: 1
-    explain: "SUBSCRIBE_NAMESPACE は「どんな名前空間があるか」を知る **発見** のため、SUBSCRIBE_TRACKS は「一致するトラックを全部押し込んで」という **購読の依頼** です。"
+    explain: "SUBSCRIBE_NAMESPACE は「どんな名前空間があるか」を知る発見のため、SUBSCRIBE_TRACKS は「一致するトラックを全部押し込んで」という購読の依頼です。"
   - q: "SUBSCRIBE_NAMESPACE (example) に対する NAMESPACE メッセージに、`(example, 42)` の名前空間はどう入る？"
     choices:
       - "`(example, 42)` 全体"
@@ -45,13 +45,13 @@ quiz:
 
 ## 💡 ひとことで言うと
 
-> **PUBLISH_NAMESPACE は「この住所の荷物はうちが扱います」という看板、SUBSCRIBE_NAMESPACE は「この地域に新しいお店ができたら教えて」という登録、SUBSCRIBE_TRACKS は「この地域の新商品は全部届けて」という定期便**。
+> PUBLISH_NAMESPACE は「この住所の荷物はうちが扱います」という看板、SUBSCRIBE_NAMESPACE は「この地域に新しいお店ができたら教えて」という登録、SUBSCRIBE_TRACKS は「この地域の新商品は全部届けて」という定期便。
 
 ## 発見は「あると便利」な機能
 
-MOQT ではトラック名を **帯域外で知っていれば**（URL に書いてある、アプリが決めている、カタログに載っている……）、SETUP 以外のメッセージなしでいきなり SUBSCRIBE できます。
+MOQT ではトラック名を帯域外で知っていれば（URL に書いてある、アプリが決めている、カタログに載っている……）、SETUP 以外のメッセージなしでいきなり SUBSCRIBE できます。
 
-それでも「どの名前空間にトラックがあるか」をセッション内で知らせたり知ったりできると便利です。そのためのメッセージが 4 種類あります。なお **MOQT サーバー自体をどう見つけるか**（どこに接続するか）は常に帯域外で、仕様の範囲外です。
+それでも「どの名前空間にトラックがあるか」をセッション内で知らせたり知ったりできると便利です。そのためのメッセージが 4 種類あります。なお MOQT サーバー自体をどう見つけるか（どこに接続するか）は常に帯域外で、仕様の範囲外です。
 
 | メッセージ | 送る側 | 意味 |
 | --- | --- | --- |
@@ -69,16 +69,16 @@ MOQT ではトラック名を **帯域外で知っていれば**（URL に書い
 - 1 つのトラックの PUBLISH が認められても、他のトラックや名前空間の公開権限まで認めてはいけない
 
 > [!WARNING] ルーティングプロトコルではない
-> PUBLISH_NAMESPACE はリレーがパブリッシャとサブスクライバをつなぐ手がかりですが、**完全なルーティングプロトコルではなくループも防ぎません**。複雑に相互接続されたリレー網の経路探索に使うべきではない（SHOULD NOT）とされています。リレー同士の接続方法は仕様の範囲外です。
+> PUBLISH_NAMESPACE はリレーがパブリッシャとサブスクライバをつなぐ手がかりですが、完全なルーティングプロトコルではなくループも防ぎません。複雑に相互接続されたリレー網の経路探索に使うべきではない（SHOULD NOT）とされています。リレー同士の接続方法は仕様の範囲外です。
 
 ## SUBSCRIBE_NAMESPACE: 一覧と変化を受け取る
 
 サブスクライバが SUBSCRIBE_NAMESPACE を送ると、パブリッシャ（リレー）は REQUEST_OK の後、同じストリームで次を送り続けます。
 
-- 一致する名前空間ごとに **NAMESPACE**
-- 名前空間がなくなったら **NAMESPACE_DONE**（以後その名前空間の新規購読を受け付けない意味）
+- 一致する名前空間ごとに NAMESPACE
+- 名前空間がなくなったら NAMESPACE_DONE（以後その名前空間の新規購読を受け付けない意味）
 
-NAMESPACE / NAMESPACE_DONE にはプレフィックスより後ろの **サフィックスだけ** が入ります。プレフィックスに 0 フィールドを指定すると「全部」です。
+NAMESPACE / NAMESPACE_DONE にはプレフィックスより後ろのサフィックスだけが入ります。プレフィックスに 0 フィールドを指定すると「全部」です。
 
 ## 流れを追ってみよう
 
@@ -121,12 +121,12 @@ sequenceDiagram
 
 ## SUBSCRIBE_TRACKS: まとめて押し込んでもらう
 
-会議室の参加者全員の音声のように、「このプレフィックス以下のトラックは、名前を知らなくても、後から増えたものも全部欲しい」という場合は **SUBSCRIBE_TRACKS** を使います。
+会議室の参加者全員の音声のように、「このプレフィックス以下のトラックは、名前を知らなくても、後から増えたものも全部欲しい」という場合は SUBSCRIBE_TRACKS を使います。
 
-- 成功するとパブリッシャは、一致するトラックごとに **新しい双方向ストリームで PUBLISH** を送ってくる（サブスクライバ自身が公開したトラックは除く）
+- 成功するとパブリッシャは、一致するトラックごとに新しい双方向ストリームで PUBLISH を送ってくる（サブスクライバ自身が公開したトラックは除く）
 - SUBSCRIBE_TRACKS に付けたパラメータ（`FORWARD`、`GROUP_ORDER`、Range Filter など）が、生まれる購読の初期値になる
 - `TRACK_PROPERTY_FILTER` で、特定のプロパティを持つトラックだけに絞れる
-- ストリーム不足などで購読を作れなかったトラックは **PUBLISH_SKIPPED** で通知される（必要なら自分で SUBSCRIBE する）
+- ストリーム不足などで購読を作れなかったトラックは PUBLISH_SKIPPED で通知される（必要なら自分で SUBSCRIBE する）
 
 {{< mermaid >}}
 sequenceDiagram
@@ -142,17 +142,17 @@ sequenceDiagram
 
 ### プレフィックスの重なりは禁止
 
-同じセッション内で、すでに確立している SUBSCRIBE_NAMESPACE（または SUBSCRIBE_TRACKS）と **共通のプレフィックスを持つ** 新しいリクエストは `PREFIX_OVERLAP` で断られます。種類ごとに独立して判定されます。プレフィックスを変えたいときは REQUEST_UPDATE の `TRACK_NAMESPACE_PREFIX` で更新できます。
+同じセッション内で、すでに確立している SUBSCRIBE_NAMESPACE（または SUBSCRIBE_TRACKS）と共通のプレフィックスを持つ新しいリクエストは `PREFIX_OVERLAP` で断られます。種類ごとに独立して判定されます。プレフィックスを変えたいときは REQUEST_UPDATE の `TRACK_NAMESPACE_PREFIX` で更新できます。
 
 ## 🧪 考えてみよう
 
-多人数のビデオ会議を MOQT で作るなら、名前空間をどう設計しますか？ 例えば `(meet.example, room1, alice)` のように「会議室 → 参加者」の順に並べておけば、`(meet.example, room1)` への SUBSCRIBE_NAMESPACE で入退室を、SUBSCRIBE_TRACKS で全員の音声を一度に受け取れます。タプルの **並び順がそのまま購読の粒度** になるのがポイントです。
+多人数のビデオ会議を MOQT で作るなら、名前空間をどう設計しますか？ 例えば `(meet.example, room1, alice)` のように「会議室 → 参加者」の順に並べておけば、`(meet.example, room1)` への SUBSCRIBE_NAMESPACE で入退室を、SUBSCRIBE_TRACKS で全員の音声を一度に受け取れます。タプルの並び順が、そのまま購読できる単位になります。
 
 ## 📝 まとめ
 
-- トラック名を知っていれば発見なしで購読できる。発見は便利機能
-- **PUBLISH_NAMESPACE** で「ここにある」と広告、**SUBSCRIBE_NAMESPACE** で名前空間の増減（NAMESPACE / NAMESPACE_DONE）を受け取る
-- **SUBSCRIBE_TRACKS** で一致するトラックの PUBLISH（購読）をまとめて受け取る
+- トラック名を知っていれば、発見の仕組みを使わずに購読できる
+- PUBLISH_NAMESPACE で「ここにある」と広告、SUBSCRIBE_NAMESPACE で名前空間の増減（NAMESPACE / NAMESPACE_DONE）を受け取る
+- SUBSCRIBE_TRACKS で一致するトラックの PUBLISH（購読）をまとめて受け取る
 - PUBLISH_NAMESPACE はルーティングプロトコルではなく、ループ防止もない
 
 ## 参考

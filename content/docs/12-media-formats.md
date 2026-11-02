@@ -54,28 +54,28 @@ quiz:
 
 ## 💡 ひとことで言うと
 
-> **MOQT は「宅配便のシステム」、LOC は「1 コマずつ詰める箱」、MSF のカタログは「番組表」**。番組表を見て欲しいトラックを選び、箱を開けて WebCodecs に渡せば再生できます。
+> MOQT は「宅配便のシステム」、LOC は「1 コマずつ詰める箱」、MSF のカタログは「番組表」。番組表を見て欲しいトラックを選び、箱を開けて WebCodecs に渡せば再生できます。
 
 ## なぜメディア層が必要か
 
 MOQT は中身を問わないので、MOQT だけではプレイヤーは再生できません。少なくとも次の 2 つを決める必要があります。
 
-1. **コンテナ**: 1 フレームを Object にどう詰めるか（タイムスタンプ、コーデック設定など）
-2. **カタログ**: どんなトラックがあり、それぞれ何のコーデック・解像度・ビットレートか
+1. コンテナ: 1 フレームを Object にどう詰めるか（タイムスタンプ、コーデック設定など）
+2. カタログ: どんなトラックがあり、それぞれ何のコーデック・解像度・ビットレートか
 
 HLS / DASH でいえば、1 がセグメント（fMP4 / TS）、2 がプレイリスト（m3u8 / MPD）です。WebRTC なら RTP ペイロード形式と SDP にあたります。
 
 | 層 | HLS / DASH | WebRTC | IETF MoQ |
 | --- | --- | --- | --- |
-| カタログ | m3u8 / MPD | SDP | **MSF カタログ** |
-| コンテナ | fMP4 / TS | RTP | **LOC**（または CMAF = CMSF） |
-| 転送 | HTTP | RTP / SRTP over UDP | **MOQT** |
+| カタログ | m3u8 / MPD | SDP | MSF カタログ |
+| コンテナ | fMP4 / TS | RTP | LOC（または CMAF = CMSF） |
+| 転送 | HTTP | RTP / SRTP over UDP | MOQT |
 
 ## LOC: 低オーバーヘッドなコンテナ
 
-**LOC（Low Overhead Media Container）** は、名前のとおり余計なカプセル化を極力しないコンテナです。
+LOC（Low Overhead Media Container）は、名前のとおり余計なカプセル化を極力しないコンテナです。
 
-- ペイロードは **WebCodecs の EncodedAudioChunk / EncodedVideoChunk の「内部データ」**、つまりコーデックの素のビットストリーム
+- ペイロードは WebCodecs の EncodedAudioChunk / EncodedVideoChunk の「内部データ」、つまりコーデックの素のビットストリーム
 - WebCodecs Codec Registry に載っているすべての音声・映像コーデックが対象
 - CMAF や RTP に比べてカプセル化のオーバーヘッドが小さく、低ビットレート音声のような用途でも負担にならない
 
@@ -96,8 +96,8 @@ HLS / DASH でいえば、1 がセグメント（fMP4 / TS）、2 がプレイ�
 </svg>
 {{< /diagram >}}
 
-- **LOC Public Properties** → MOQT の Object Properties に入る。リレーやメディアスイッチが、ペイロード（暗号化されているかも）を見ずに判断に使える
-- **LOC Private Properties + LOC Payload** → MOQT の Object Payload に入る。リレー向けではなく、エンドツーエンド暗号化できる
+- LOC Public Properties → MOQT の Object Properties に入る。リレーやメディアスイッチが、ペイロード（暗号化されているかも）を見ずに判断に使える
+- LOC Private Properties + LOC Payload → MOQT の Object Payload に入る。リレー向けではなく、エンドツーエンド暗号化できる
 
 ### 主な LOC プロパティ
 
@@ -116,7 +116,7 @@ HLS / DASH でいえば、1 がセグメント（fMP4 / TS）、2 がプレイ�
 
 ## MSF: ストリーミングフォーマットとカタログ
 
-**MSF（MOQT Streaming Format）** は、LOC でパッケージしたメディアを MOQT で配るための相互運用フォーマットです。カタログ、時刻合わせ、優先度の付け方、配信の開始・終了、ABR の方法などを定めます。
+MSF（MOQT Streaming Format）は、LOC でパッケージしたメディアを MOQT で配るための相互運用フォーマットです。カタログ、時刻合わせ、優先度の付け方、配信の開始・終了、ABR の方法などを定めます。
 
 対象とする遅延の目安も書かれています（パブリッシャが送出してから視聴者が描画するまで）。
 
@@ -129,18 +129,18 @@ HLS / DASH でいえば、1 がセグメント（fMP4 / TS）、2 がプレイ�
 
 ### パッケージングのルール
 
-- 1 つの EncodedAudioChunk / EncodedVideoChunk = **1 つの MOQT Object**
-- 同じ GOP のサンプルは **同じ Group** に入れる
+- 1 つの EncodedAudioChunk / EncodedVideoChunk = 1 つの MOQT Object
+- 同じ GOP のサンプルは同じ Group に入れる
 - Group ID は単調増加し、継続中は 1 ずつ増やす（SHOULD）。再起動時は以前より大きい値から始める（例: 現在時刻のミリ秒）
 - Object ID は各 Group で 0 から始めて 1 ずつ増やす
 
 ### カタログトラック
 
-カタログは、パブリッシャが出しているトラックを説明する **MOQT トラック** です（HTTP で別に取りに行くのではない）。
+カタログは、パブリッシャが出しているトラックを説明する MOQT トラックです（HTTP で別に取りに行くのではない）。
 
-- トラック名は **`catalog`**（大文字小文字を区別）
-- 中身は **JSON**。ペイロードはリレーにとって不透明で、暗号化もできる
-- 各 Group の **Object 0 は独立した完全なカタログ**、それ以降の Object は **差分（deltaUpdate）**。差分は Subgroup 0 に入れる
+- トラック名は `catalog`（大文字小文字を区別）
+- 中身は JSON。ペイロードはリレーにとって不透明で、暗号化もできる
+- 各 Group の Object 0 は独立した完全なカタログ、それ以降の Object は差分（deltaUpdate）。差分は Subgroup 0 に入れる
 - 差分でできるのは「トラックの追加」「既存トラックを複製して追加」「トラックの削除」だけ。トラックの属性を変えたいときは、別名で追加して古いものを削除する
 - 視聴者は購読と同時に最新 Group の先頭から取得する（MSF-01 の表現では Joining FETCH。transport-22 では SUBSCRIBE + FILL_PARAMETERS に相当、06 章）
 
@@ -196,15 +196,15 @@ MSF-01 の例をもとにした最小のカタログ:
 
 ### time-aligned と ABR
 
-同じ alternate group のトラックは **time-aligned（時刻が揃っている）** でなければなりません。同じ番号の Group の先頭フレームが同じ表示時刻になるので、視聴者は **Group 境界で品質の違うトラックへきれいに切り替えられます**。MoQ の ABR は「Group 境界で別トラックに購読を切り替える」ことで実現します。
+同じ alternate group のトラックは time-aligned（時刻が揃っている）でなければなりません。同じ番号の Group の先頭フレームが同じ表示時刻になるので、視聴者は Group 境界で品質の違うトラックへきれいに切り替えられます。MoQ の ABR は「Group 境界で別トラックに購読を切り替える」ことで実現します。
 
 ### その他のトラック
 
-MSF は、メディア時間と Group / Object の対応を示す **Media Timeline トラック**、SCTE-35 などのイベントを運ぶ **Event Timeline トラック**、クライアントの QoE やリレーの動作を報告する **ログ / メトリクス用の publish トラック** なども定義しています。字幕（WebVTT / IMSC1）、コンテンツ暗号化、トークン認可、広告挿入も範囲に入っています。
+MSF は、メディア時間と Group / Object の対応を示す Media Timeline トラック、SCTE-35 などのイベントを運ぶ Event Timeline トラック、クライアントの QoE やリレーの動作を報告するログ / メトリクス用の publish トラックなども定義しています。字幕（WebVTT / IMSC1）、コンテンツ暗号化、トークン認可、広告挿入も範囲に入っています。
 
 ## CMSF: CMAF でも運べる MSF
 
-既存の配信システムの多くは **CMAF（fMP4）** でメディアを作っています。**CMSF（CMAF compliant MSF）** は MSF を拡張し、MSF のカタログ・タイムライン・ABR・LOC サポートをすべて引き継いだうえで、**CMAF でパッケージしたメディア** も運べるようにします。HLS / DASH 用に作ったコンテンツを再パッケージせずに MoQ で配れるので、「Convergence（01 章）」の目標に近づきます。
+既存の配信システムの多くは CMAF（fMP4）でメディアを作っています。CMSF（CMAF compliant MSF）は MSF を拡張し、MSF のカタログ・タイムライン・ABR・LOC サポートをすべて引き継いだうえで、CMAF でパッケージしたメディアも運べるようにします。HLS / DASH 用に作ったコンテンツを再パッケージせずに MoQ で配れるので、「Convergence（01 章）」の目標に近づきます。
 
 ## 🧪 考えてみよう
 
@@ -212,7 +212,7 @@ LOC と CMAF、どちらを選ぶべきでしょう？ ブラウザの WebCodecs
 
 ## 📝 まとめ
 
-- MOQT の上で、**コンテナ（LOC / CMAF）** と **カタログ（MSF）** がメディアの意味を与える
+- MOQT の上で、コンテナ（LOC / CMAF）とカタログ（MSF）がメディアの意味を与える
 - LOC はペイロード = WebCodecs のチャンク。Public Properties はリレーから見え、Private Properties は暗号化できる
 - MSF のカタログは `catalog` トラックの JSON。Group の Object 0 が完全版、以降は差分
 - CMSF は MSF に CMAF パッケージングを加え、既存エコシステムと相互運用する

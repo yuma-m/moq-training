@@ -46,19 +46,19 @@ quiz:
 
 ## 💡 ひとことで言うと
 
-> **MoQ の売りは「1 つのプロトコルと 1 つのリレー網で、取り込みから配信、会議まで」**。違いは「どれだけ待つか」「何を捨てるか」の設定だけ、という世界を目指しています。
+> MoQ は、取り込みから配信、会議までを 1 つのプロトコルと 1 つのリレー網で扱うことを目指しています。用途ごとに変えるのは、どれだけ待つかと、何を捨てるかの設定です。
 
 ## ユースケース
 
 | ユースケース | MoQ の効きどころ |
 | --- | --- |
-| **大規模ライブ配信**（スポーツ、イベント） | HLS 並みの CDN スケールで、遅延を数秒 → 1 秒未満へ。ネタバレ問題の解消 |
-| **取り込み（コントリビューション）** | RTMP / SRT の代わりに同じ MOQT で配信者 → リレーへ。再パッケージ不要 |
-| **会議・インタラクティブ配信** | 視聴者が多い「ウェビナー」「ライブコマース」「双方向ライブ」を SFU なしでリレー網で |
-| **クラウドゲーム・リモート操作** | 優先度とタイムアウトで最新フレームを優先。データグラムで入力やカーソル |
-| **AI 音声・映像エージェント** | TTS の音声や生成映像を低遅延で配信。視聴側は必要に応じてバッファを厚く |
-| **ロボティクス・IoT** | 映像とセンサーデータを同じ pub/sub で。名前空間で機体やセンサーを整理 |
-| **非メディア** | チャット、ゲーム状態、ライブ字幕など、「トラック」にできるものなら何でも |
+| 大規模ライブ配信（スポーツ、イベント） | HLS 並みの CDN スケールを保ったまま、遅延を HLS より短くする。ネタバレ問題の解消 |
+| 取り込み（コントリビューション） | RTMP / SRT の代わりに同じ MOQT で配信者 → リレーへ。再パッケージ不要 |
+| 会議・インタラクティブ配信 | 視聴者が多い「ウェビナー」「ライブコマース」「双方向ライブ」を SFU なしでリレー網で |
+| クラウドゲーム・リモート操作 | 優先度とタイムアウトで最新フレームを優先。データグラムで入力やカーソル |
+| AI 音声・映像エージェント | TTS の音声や生成映像を低遅延で配信。視聴側は必要に応じてバッファを厚く |
+| ロボティクス・IoT | 映像とセンサーデータを同じ pub/sub で。名前空間で機体やセンサーを整理 |
+| 非メディア | チャット、ゲーム状態、ライブ字幕など、「トラック」にできるものなら何でも |
 
 ## 既存技術との比較
 
@@ -66,7 +66,7 @@ quiz:
 
 | 観点 | HLS / DASH | MoQ |
 | --- | --- | --- |
-| 配る単位 | **完成した** セグメント（数秒）を HTTP で | Group を **作りながら** QUIC ストリームで |
+| 配る単位 | 完成したセグメント（数秒）を HTTP で | Group を作りながら QUIC ストリームで |
 | 遅延 | 通常は数秒〜数十秒、LL-HLS / LL-DASH でも数秒程度 | 設定次第で数百 ms〜 |
 | CDN | 既存の HTTP CDN をそのまま使える（最大の強み） | MoQ 対応のリレー網が必要（HTTP/3 の CDN は QUIC を運用済みなので延長線上にある） |
 | ABR | 次のセグメント境界まで切り替えられない | 新しい Group を優先、古い Group はスキップ。Group 境界で品質を切り替え |
@@ -91,7 +91,7 @@ quiz:
 | 成熟度 | 長年の実績とブラウザ実装 | 策定中・実装が進行中 |
 
 > [!NOTE] 「どれだけ待つか」は視聴者が決める
-> MoQ では、同じ配信でも視聴者側の遅延予算を変えるだけで体験が変わります。遅延予算 10 秒なら HLS のように途切れにくく、100ms ならビデオ通話のように。途切れやすい回線の視聴者はバッファを厚く、低遅延が欲しい視聴者は薄く——同じリレーから選べます。
+> MoQ では、同じ配信でも視聴者側の遅延予算を変えるだけで体験が変わります。遅延予算 10 秒なら HLS のように途切れにくく、100ms ならビデオ通話のように。途切れやすい回線の視聴者はバッファを厚く、低遅延が欲しい視聴者は薄くでき、どちらも同じリレーから受け取れます。
 
 ## 標準化の現状（2026 年 10 月）
 
@@ -107,19 +107,19 @@ quiz:
 > [!TIP] 最近のドラフトの主な変化
 > このコースで扱った draft-22 は、以前の版から大きく変わっています。古い記事を読むときは次の違いに注意しましょう。
 >
-> - 制御メッセージを 1 本の双方向ストリームに流す方式 → **制御ストリーム（単方向×2）+ リクエストごとの双方向ストリーム**
-> - ANNOUNCE / SUBSCRIBE_ANNOUNCES → **PUBLISH_NAMESPACE / SUBSCRIBE_NAMESPACE / SUBSCRIBE_TRACKS**
-> - Joining FETCH → **SUBSCRIBE + FILL_PARAMETERS**
-> - SUBSCRIBE の固定フィールドだったフィルタや優先度 → **パラメータ**（LOCATION_FILTER、SUBSCRIBER_PRIORITY など）
-> - Header Extensions → **Properties**（Track / Object Properties）
-> - QUIC と同じ varint → **MOQT 独自の vi64**
+> - 制御メッセージを 1 本の双方向ストリームに流す方式 → 制御ストリーム（単方向×2）+ リクエストごとの双方向ストリーム
+> - ANNOUNCE / SUBSCRIBE_ANNOUNCES → PUBLISH_NAMESPACE / SUBSCRIBE_NAMESPACE / SUBSCRIBE_TRACKS
+> - Joining FETCH → SUBSCRIBE + FILL_PARAMETERS
+> - SUBSCRIBE の固定フィールドだったフィルタや優先度 → パラメータ（LOCATION_FILTER、SUBSCRIBER_PRIORITY など）
+> - Header Extensions → Properties（Track / Object Properties）
+> - QUIC と同じ varint → MOQT 独自の vi64
 
 ## 次に学ぶこと
 
-- **仕様を読む**: [draft-ietf-moq-transport](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) 本文。このコースで全体像を掴んだら、§9（制御メッセージ）と §11（データストリーム）のワイヤーフォーマットを読んでみましょう
-- **動かす**: [moq.dev のデモ](https://moq.dev/demo) や、moq-relay をローカルで立てて OBS から配信してみる
-- **実装を読む**: [moq-wg の実装一覧](https://github.com/moq-wg/moq-transport/wiki/Implementations) や moq.dev の Rust / TypeScript のコード
-- **議論を追う**: [moq-wg/moq-transport の Issue](https://github.com/moq-wg/moq-transport/issues) や IETF のメーリングリスト
+- 仕様を読む: [draft-ietf-moq-transport](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) 本文。このコースで全体像を掴んだら、§9（制御メッセージ）と §11（データストリーム）のワイヤーフォーマットを読んでみましょう
+- 動かす: [moq.dev のデモ](https://moq.dev/demo) や、moq-relay をローカルで立てて OBS から配信してみる
+- 実装を読む: [moq-wg の実装一覧](https://github.com/moq-wg/moq-transport/wiki/Implementations) や moq.dev の Rust / TypeScript のコード
+- 議論を追う: [moq-wg/moq-transport の Issue](https://github.com/moq-wg/moq-transport/issues) や IETF のメーリングリスト
 
 ## 🧪 考えてみよう
 
@@ -131,7 +131,7 @@ quiz:
 - HLS / DASH の CDN スケール、WebRTC の低遅延、RTMP / SRT の取り込みを 1 つにまとめることを目指している
 - 標準はまだドラフト（transport-22）。版ごとの違いに注意しながら、仕様と実装の両方を追いかけよう
 
-🎉 **お疲れさまでした！** トップページの進捗表で、全章のクイズ結果を確認してみましょう。
+🎉 お疲れさまでした！トップページの進捗表で、全章のクイズ結果を確認してみましょう。
 
 ## 参考
 
